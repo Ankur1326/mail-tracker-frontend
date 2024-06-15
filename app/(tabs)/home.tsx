@@ -1,12 +1,9 @@
-import { Image, StyleSheet, Platform, ActivityIndicator } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { useEffect, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
+import { ListItem } from "@/components/ListItem";
+import ParallaxScrollView from "@/components/ParallaxScrollView";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Image, StyleSheet } from "react-native";
 
 type Mail = {
   emails: {
@@ -19,24 +16,38 @@ type Mail = {
   emailId: string
 }
 
-export default function HomeScreen() {
-
+export default function home() {
+  
   const [mails, setMails] = useState<Mail[]>([])
   const [loading, setLoading] = useState<boolean>(true)
 
   const getData = async () => {
+
     try {
-      console.log("API URL: ", process.env.EXPO_PUBLIC_API_URL)
-      const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/emails/newsletters`, {
+      const token = await AsyncStorage.getItem("@token")
+      if (!token) {
+        console.error("No token found in AsyncStorage");
+        return [];
+      }
+      // console.log("Token: ", token);
+      
+      const apiUrl = process.env.EXPO_PUBLIC_API_URL || "http://192.168.43.207:8000";
+      // console.log("API URL: ", apiUrl);
+      
+      const response = await axios.get(`${apiUrl}/emails/newsletters`, {
         headers: {
-          Authorization: `Bearer ${await AsyncStorage.getItem("@token")}`
+          Authorization: `Bearer ${token}`
         }
       })
-      console.log("Response: ", response.data)
+      // console.log("Response: ", response.data)
       return response.data
     } catch (err) {
-      console.log("Error Fetching Emails: ", err)
-      return []
+      if (axios.isAxiosError(err)) {
+        console.error("Error Fetching Emails: ", err.response?.data || err.message);
+      } else {
+        console.error("Error Fetching Emails: ", err);
+      }
+      return [];
     }
   }
 
@@ -61,7 +72,7 @@ export default function HomeScreen() {
       }
     >
 
-      {/* {loading ? <ActivityIndicator size={"large"} color="#C94747" /> : mails.map(
+      {loading ? <ActivityIndicator size={"large"} color="#C94747" /> : mails.map(
         ({ companyName, emailId, companyLogo, emails, unsubscribeLink }, index) => (
           <ListItem
             key={index}
@@ -72,15 +83,15 @@ export default function HomeScreen() {
             unsubscribeLink={unsubscribeLink}
           />
         )
-      )} */}
+      )}
     </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   stepContainer: {
@@ -88,10 +99,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   reactLogo: {
-    height: 178,
-    width: 290,
+    height: "100%",
+    width: "100%",
     bottom: 0,
     left: 0,
-    position: 'absolute',
+    position: "absolute",
   },
 });
