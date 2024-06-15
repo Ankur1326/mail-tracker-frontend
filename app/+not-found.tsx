@@ -3,8 +3,12 @@ import { StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function NotFoundScreen() {
+
+  
   return (
     <>
       <Stack.Screen options={{ title: 'Oops!' }} />
